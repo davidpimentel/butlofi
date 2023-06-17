@@ -3,11 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <!-- <meta name="viewport" content="width=device-width, initial-scale=1.0" /> -->
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, orientation=landscape"
-    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <title>Fullscreen YouTube Video</title>
     <style>
@@ -88,11 +84,18 @@
 
       function getVideoIdFromQuery() {
         var urlParams = new URLSearchParams(window.location.search);
-        return urlParams.get("v");
+        var subdomain = window.location.hostname.split(".")[0];
+
+        console.log(subdomain);
+        if (subdomain === "cspan") {
+          return "_E-4jtTFsO4";
+        } else {
+          return urlParams.get("v") || "OMlf71t2oV0";
+        }
       }
 
       function onYouTubeIframeAPIReady() {
-        var videoId = getVideoIdFromQuery() || "OMlf71t2oV0";
+        var videoId = getVideoIdFromQuery();
         player = new YT.Player("video-container", {
           height: "100%",
           width: "100%",
