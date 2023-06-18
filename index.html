@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <title>But LoFi</title>
+    <title>butlofi</title>
     <style>
       body {
         margin: 0;
@@ -31,6 +31,23 @@
         align-items: center;
         justify-content: center;
         pointer-events: auto;
+      }
+
+      #overlay-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
+
+      #overlay-text {
+        color: #fff;
+        font-family: "Open Sans", sans-serif;
+        font-size: 16px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.2em;
+        text-align: center;
       }
 
       #enter-button {
@@ -60,7 +77,16 @@
   <body>
     <div id="video-container"></div>
     <div id="overlay">
-      <div id="enter-button">Enter</div>
+      <div id="overlay-content">
+        <object
+          id="butlofi-svg"
+          type="image/svg+xml"
+          data="butlofi.svg"
+          width="227px"
+          height="100px"
+        ></object>
+        <p id="overlay-text">CLICK TO START LISTENING</p>
+      </div>
     </div>
     <div id="soundcloud-container">
       <iframe
@@ -77,25 +103,28 @@
     <script src="https://www.youtube.com/iframe_api"></script>
     <script src="https://w.soundcloud.com/player/api.js"></script>
     <script>
-      var player;
-      var overlay = document.getElementById("overlay");
-      var enterButton = document.getElementById("enter-button");
-      var soundcloudContainer = document.getElementById("soundcloud-container");
-      var soundcloudIframe = document.getElementById("soundcloud-iframe");
+      let player;
+      const overlay = document.getElementById("overlay");
+      const overlayContent = document.getElementById("overlay-content");
+      const overlayText = document.getElementById("overlay-text");
+      const soundcloudContainer = document.getElementById(
+        "soundcloud-container"
+      );
+      const soundcloudIframe = document.getElementById("soundcloud-iframe");
 
-      function getVideoIdFromQuery() {
-        var urlParams = new URLSearchParams(window.location.search);
-        var subdomain = window.location.hostname.split(".")[0];
+      const getVideoIdFromQuery = () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const subdomain = window.location.hostname.split(".")[0];
 
         if (subdomain === "cspan") {
           return "_E-4jtTFsO4";
         } else {
           return urlParams.get("v") || "OMlf71t2oV0";
         }
-      }
+      };
 
-      function onYouTubeIframeAPIReady() {
-        var videoId = getVideoIdFromQuery();
+      const onYouTubeIframeAPIReady = () => {
+        const videoId = getVideoIdFromQuery();
         player = new YT.Player("video-container", {
           height: "100%",
           width: "100%",
@@ -124,30 +153,53 @@
             onStateChange: onPlayerStateChange,
           },
         });
-      }
+      };
 
-      function onPlayerReady(event) {
-        event.target.setVolume(25);
-        enterButton.addEventListener("click", function () {
+      const onPlayerReady = (event) => {
+        event.target.setVolume(35);
+        const initialClickListener = () => {
+          overlayContent.style.display = "none";
+          overlay.style.background = "transparent";
+          overlay.addEventListener("click", togglePlayState);
+          overlay.removeEventListener("click", initialClickListener);
+          overlayText.innerText = "Click to resume listening";
           player.playVideo();
-          overlay.style.display = "none";
-          soundcloudContainer.style.display = "block";
-          soundcloudIframe.src =
-            "https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/playlists/265917916&color=ff5500&auto_play=true&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true&shuffle=true";
-        });
-      }
+        };
+        overlay.addEventListener("click", initialClickListener);
+        soundcloudContainer.style.display = "none";
+        soundcloudIframe.src =
+          "https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/playlists/265917916&color=ff5500&auto_play=true&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true&shuffle=true";
+      };
 
-      function onPlayerStateChange(event) {
+      const togglePlayState = () => {
+        if (player.getPlayerState() === YT.PlayerState.PLAYING) {
+          player.pauseVideo();
+          overlay.style.background = "rgba(0, 0, 0, 0.8)";
+          overlayContent.style.display = "flex";
+        } else {
+          overlay.style.background = "transparent";
+          overlayContent.style.display = "none";
+          player.playVideo();
+        }
+      };
+
+      const onPlayerStateChange = (event) => {
         if (event.data === YT.PlayerState.PAUSED) {
           soundcloudIframe.contentWindow.postMessage('{"method":"pause"}', "*");
         } else if (event.data === YT.PlayerState.PLAYING) {
           soundcloudIframe.contentWindow.postMessage('{"method":"play"}', "*");
         }
-      }
-    </script>
-    <script src="https://www.youtube.com/iframe_api"></script>
-    <script>
-      onYouTubeIframeAPIReady();
+      };
+
+      const loadYouTubeAPI = () => {
+        const tag = document.createElement("script");
+        tag.src = "https://www.youtube.com/iframe_api";
+        const firstScriptTag = document.getElementsByTagName("script")[0];
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+      };
+
+      window.onYouTubeIframeAPIReady = onYouTubeIframeAPIReady;
+      loadYouTubeAPI();
     </script>
   </body>
 </html>
