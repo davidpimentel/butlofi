@@ -38,6 +38,7 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
+        pointer-events: none;
       }
 
       #overlay-text {
@@ -95,13 +96,17 @@
         "soundcloud-container"
       );
       const soundcloudIframe = document.getElementById("soundcloud-iframe");
+      const subdomainVideos = {
+        cspan: "_E-4jtTFsO4",
+        bobross: "37uukyggMG8",
+      };
 
       const getVideoIdFromQuery = () => {
         const urlParams = new URLSearchParams(window.location.search);
         const subdomain = window.location.hostname.split(".")[0];
 
-        if (subdomain === "cspan") {
-          return "_E-4jtTFsO4";
+        if (subdomainVideos[subdomain]) {
+          return subdomainVideos[subdomain];
         } else {
           return urlParams.get("v") || "OMlf71t2oV0";
         }
@@ -131,6 +136,7 @@
             showinfo: 0,
             controls: 0,
             rel: 0,
+            html5: 1, // Enable HTML5 player
           },
           events: {
             onReady: onPlayerReady,
@@ -140,7 +146,7 @@
       };
 
       const onPlayerReady = (event) => {
-        event.target.setVolume(35);
+        event.target.setVolume(40);
         const initialClickListener = () => {
           overlayContent.style.display = "none";
           overlay.style.background = "transparent";
@@ -177,7 +183,7 @@
 
       const loadYouTubeAPI = () => {
         const tag = document.createElement("script");
-        tag.src = "https://www.youtube.com/iframe_api";
+        tag.src = "https://www.youtube.com/player_api";
         const firstScriptTag = document.getElementsByTagName("script")[0];
         firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
       };
